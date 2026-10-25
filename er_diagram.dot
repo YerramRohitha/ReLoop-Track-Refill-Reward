@@ -1,0 +1,44 @@
+digraph ReLoop {
+  rankdir=LR; graph [fontname="Helvetica", bgcolor="white", pad=0.3, nodesep=0.5, ranksep=0.9];
+  node [shape=plain, fontname="Helvetica"]; edge [fontname="Helvetica", fontsize=10, color="#6B7280"];
+
+  institutions [label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="4" color="#2E7D32">
+    <tr><td bgcolor="#2E7D32"><font color="white"><b>institutions</b></font></td></tr>
+    <tr><td align="left"><b>PK institution_id</b><br align="left"/>name<br align="left"/>city<br align="left"/></td></tr></table>>];
+  users [label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="4" color="#2E7D32">
+    <tr><td bgcolor="#2E7D32"><font color="white"><b>users</b></font></td></tr>
+    <tr><td align="left"><b>PK user_id</b><br align="left"/>FK institution_id<br align="left"/>role, name, alias<br align="left"/>identifier (unique)<br align="left"/>department, hostel<br align="left"/>created_at<br align="left"/></td></tr></table>>];
+  otp_codes [label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="4" color="#2E7D32">
+    <tr><td bgcolor="#2E7D32"><font color="white"><b>otp_codes</b></font></td></tr>
+    <tr><td align="left"><b>PK otp_id</b><br align="left"/>identifier<br align="left"/>code, expires_at, used<br align="left"/></td></tr></table>>];
+  outlets [label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="4" color="#2E7D32">
+    <tr><td bgcolor="#2E7D32"><font color="white"><b>outlets</b></font></td></tr>
+    <tr><td align="left"><b>PK outlet_id</b><br align="left"/>FK institution_id<br align="left"/>FK vendor_user_id<br align="left"/>name, type, location<br align="left"/></td></tr></table>>];
+  item_types [label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="4" color="#2E7D32">
+    <tr><td bgcolor="#2E7D32"><font color="white"><b>item_types</b></font></td></tr>
+    <tr><td align="left"><b>PK item_type_id</b><br align="left"/>name (unique)<br align="left"/>plastic_grams<br align="left"/>emission_kg<br align="left"/>reuse_footprint_kg<br align="left"/></td></tr></table>>];
+  containers [label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="4" color="#2E7D32">
+    <tr><td bgcolor="#2E7D32"><font color="white"><b>containers</b></font></td></tr>
+    <tr><td align="left"><b>PK container_id</b><br align="left"/>FK outlet_id<br align="left"/>FK item_type_id<br align="left"/>code (unique, on QR)<br align="left"/>type, material<br align="left"/>wash_status, condition<br align="left"/></td></tr></table>>];
+  transactions [label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="4" color="#2E7D32">
+    <tr><td bgcolor="#F9A825"><b>transactions</b></td></tr>
+    <tr><td align="left"><b>PK txn_id</b><br align="left"/>FK user_id, outlet_id<br align="left"/>FK container_id (nullable)<br align="left"/>FK item_type_id<br align="left"/>action, status<br align="left"/>created_at, approved_at, approved_by<br align="left"/>due_at, returned_at, return_outlet_id<br align="left"/>plastic_g, co2_g, points_awarded<br align="left"/></td></tr></table>>];
+  points_ledger [label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="4" color="#2E7D32">
+    <tr><td bgcolor="#2E7D32"><font color="white"><b>points_ledger</b></font></td></tr>
+    <tr><td align="left"><b>PK ledger_id</b><br align="left"/>FK user_id, txn_id<br align="left"/>points (+/-), reason<br align="left"/>created_at<br align="left"/></td></tr></table>>];
+  rewards [label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="4" color="#2E7D32">
+    <tr><td bgcolor="#2E7D32"><font color="white"><b>rewards</b></font></td></tr>
+    <tr><td align="left"><b>PK reward_id</b><br align="left"/>FK outlet_id (nullable)<br align="left"/>title, points_cost<br align="left"/>stock, active<br align="left"/></td></tr></table>>];
+  redemptions [label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="4" color="#2E7D32">
+    <tr><td bgcolor="#2E7D32"><font color="white"><b>redemptions</b></font></td></tr>
+    <tr><td align="left"><b>PK redemption_id</b><br align="left"/>FK user_id, reward_id<br align="left"/>points_spent<br align="left"/>voucher_code, created_at<br align="left"/></td></tr></table>>];
+
+  institutions -> users [label="1 : N"]; institutions -> outlets [label="1 : N"];
+  users -> outlets [label="vendor 1 : N"]; users -> transactions [label="1 : N"];
+  outlets -> transactions [label="1 : N"]; outlets -> containers [label="1 : N"];
+  containers -> transactions [label="1 : N"]; item_types -> containers [label="1 : N"];
+  item_types -> transactions [label="1 : N"]; transactions -> points_ledger [label="1 : N"];
+  users -> points_ledger [label="1 : N"]; users -> redemptions [label="1 : N"];
+  rewards -> redemptions [label="1 : N"]; outlets -> rewards [label="1 : N"];
+  users -> otp_codes [style=dashed, label="by identifier"];
+}
